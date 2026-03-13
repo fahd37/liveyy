@@ -1,0 +1,35 @@
+name: Auto-Generate Link Matrix
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'assets/**'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Run Matrix Builder
+        run: python build_matrix.py
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html sitemap.xml
+          git commit -m "🤖 Auto-updated HTML Hub and XML Sitemap" || echo "No changes to commit"
+          git push
