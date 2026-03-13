@@ -1,35 +1,59 @@
-name: Auto-Generate Link Matrix
+name: Deploy React App to GitHub Pages
 
+# When to run the workflow
 on:
   push:
     branches:
       - main
-    paths:
-      - 'assets/**'
+  workflow_dispatch: # Gives you the manual "Run" button
+
+# Grant necessary permissions for GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Prevent multiple builds from running at the same time and messing up
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
-    
-    permissions:
-      contents: write
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          python-version: '3.10'
+          node-version: '20' # Standard modern Node version
+          cache: 'npm'
 
-      - name: Run Matrix Builder
-        run: python build_matrix.py
+      - name: Install Dependencies
+        run: npm ci
 
-      - name: Commit and Push Changes
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add index.html sitemap.xml
-          git commit -m "🤖 Auto-updated HTML Hub and XML Sitemap" || echo "No changes to commit"
-          git push
+      - name: Build React App
+        run: npm run build
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Production Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # IMPORTANT: If you used Vite, change this to './dist'
+          # If you used Create React App, leave it as './build'
+          path: './build' 
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
