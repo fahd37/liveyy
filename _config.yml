@@ -1,0 +1,26 @@
+# 1. Site Identity (Helps structure the XML)
+title: "Live Sports Broadcasts"
+description: "Live match updates and streams."
+url: "https://fahd37.github.io"
+baseurl: "/liveyy"
+
+# 2. The Automation Engine
+plugins:
+  - jekyll-sitemap
+
+# 3. The Blocklist (CRITICAL for your architecture)
+# This prevents your backend scripts and structural folders 
+# from being added to the public sitemap.xml
+exclude:
+  - .github/
+  - indexer.py
+  - phase1_radar.py
+  - phase2_forge.py
+  - phase3_factory.py
+  - phase4_deploy.py
+  - phase5_indexer.py
+  - main.py
+  - weaponized_targets.json
+  - targets_to_index.txt
+  - google_secret_key.json
+  - README.md
